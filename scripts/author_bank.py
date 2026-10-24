@@ -1,9 +1,10 @@
-"""Deterministic original concept questions; no past paper or numerical variants.
+"""Deterministic original bank: 200 concepts + 800 numeric variants / 20 families. No past papers.
 Authored from general model knowledge. External expert and official cross-check pending.
 Each row: topic, stem, correct option, three distractors, explanatory rationale.
 """
 import json,csv
 from pathlib import Path
+from expanded_bank import build_expansion
 ROOT=Path(__file__).resolve().parents[1]
 subjects=['소방원론','소방전기일반','소방관계법규','소방전기시설의 구조 및 원리']
 rows=[
@@ -103,10 +104,13 @@ for si,group in enumerate(rows):
   choices=[answer,b,c,d]; shift=i%4;choices=choices[shift:]+choices[:shift]
   bank.append(dict(id=f'FPE-{si+1}-{i+1:03}',subject=subjects[si],topic=topic,question=stem,choices=choices,answer=choices.index(answer)+1,explanation=explanation,difficulty='하',year=None,session=None,type='original',sourceUrl='https://github.com/YunSangYeong/Fire-Protection-Equipment-Engineer-Electrical--CBT/blob/main/scripts/author_bank.py',verificationStatus='reviewed',reviewNote='AI 일반 지식으로 자체 작성 후 문장·정답·오답 선택지 내부 대조. 외부 정답 증빙·전문가 검수·공식 출제기준 대조 없음. 법규 과목은 일반 법령 독해 연습이며 현행 소방 법령 세부 규정 문항이 아님.',version='main',rights='자체 제작 · CC BY 4.0 · 이 저장소와 작성 원고를 표시. 외부 기출 복제 없음.'))
 assert len({q['id'] for q in bank})==80
+bank.extend(build_expansion())
+assert len(bank)==1000
+assert len({q['id'] for q in bank})==1000
 (ROOT/'src/data/questions.json').write_text(json.dumps(bank,ensure_ascii=False,indent=2)+'\n')
 sample={**bank[20], 'id':'IMPORT-EXAMPLE-001','question':'저항 10 Ω에 50 V의 직류 전압을 가했을 때 전류는?','choices':['5 A','0.2 A','500 A','40 A'],'answer':1,'explanation':'옴의 법칙 I=V/R=50/10=5 A이다. 전압과 저항의 단위를 확인한다.','verificationStatus':'pending'}
 (ROOT/'public/templates/questions.json').write_text(json.dumps([sample],ensure_ascii=False,indent=2)+'\n')
 choices=sample.pop('choices');sample.update({f'choice{i+1}':v for i,v in enumerate(choices)})
 with (ROOT/'public/templates/questions.csv').open('w',newline='',encoding='utf-8-sig') as f:
  w=csv.DictWriter(f,fieldnames=list(sample),lineterminator="\n");w.writeheader();w.writerow(sample)
-print('80 internally reviewed original concept questions; target shortfall 920; no numeric variants')
+print('1000 original internally reviewed items: 200 concepts + 800 numeric variants / 20 families; external and official cross-check pending')

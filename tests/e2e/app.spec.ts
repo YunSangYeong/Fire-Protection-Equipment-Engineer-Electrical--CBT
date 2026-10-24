@@ -32,7 +32,7 @@ test("학습 기준 선택 제거·모바일 화면·이전 선택 복원", asyn
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
-  await expect(page.locator(".bank-summary")).toContainText(/등록\s*80문항/);
+  await expect(page.locator(".bank-summary")).toContainText(/등록\s*1000문항/);
   await expect(page.getByLabel("학습 기준")).toHaveCount(0);
   await expect(page.locator("main")).not.toContainText("학습 기준");
   await expect(page.locator("main")).not.toContainText("2027–2029");
@@ -193,7 +193,7 @@ test("JSON 등록·중복 제거·검수 대기·사용자 검수·CSV 등록·�
   await expectNoDefaultVersionYears(page);
   await expect(page.locator(".bank-filter")).toContainText("기본 문제은행");
   await expect(page.locator(".bank-row")).toHaveCount(20);
-  await expect(page.locator(".pagination")).toContainText("1 / 4");
+  await expect(page.locator(".pagination")).toContainText("1 / 50");
   await page.getByLabel("문항 검색", { exact: true }).fill("FPE-2-001");
   await expect(page.locator(".bank-row")).toHaveCount(1);
   await page.locator(".bank-row summary").click();
@@ -440,4 +440,38 @@ test("실전시험에서도 답안 선택 후 Space로 이동하며 미응답·�
   await page.keyboard.press("Space");
   const saved = await read(page);
   expect(saved.exam.answers[saved.exam.questions[79].id]).toBe(2);
+});
+
+test('1000문항 수량·변형 구분·마지막 추가 문항 검색·내보내기·실제 채점',async({page})=>{
+ await page.goto('');
+ await expect(page.locator('.bank-summary')).toContainText('등록 1000문항');
+ await expect(page.locator('.bank-summary')).toContainText('수치 조건 변형 800문항');
+ await nav(page,'문제은행 관리');
+ await expect(page.locator('.notice')).toContainText('개념형 200문항');
+ await expect(page.locator('.notice')).toContainText('800문항(20유형)');
+ await expect(page.locator('.notice')).toContainText('부족 0문항');
+ const q=bank.find(q=>q.id==='FPE-N-batteryUsable-040')!;
+ await page.getByLabel('문항 검색',{exact:true}).fill(q.id);
+ await expect(page.locator('.bank-row')).toHaveCount(1);
+ await page.locator('.bank-row summary').click();
+ await expect(page.locator('.explanation')).toContainText(q.explanation);
+ await expect(page.locator('.explanation')).toContainText('수치 조건 변형 · FPE-batteryUsable');
+ const downloading=page.waitForEvent('download');
+ await page.getByRole('button',{name:'전체 문항 내보내기'}).click();
+ const download=await downloading;
+ const fs=await import('node:fs/promises');
+ const exported=JSON.parse(await fs.readFile((await download.path())!,'utf8'));
+ expect(exported).toHaveLength(1000);
+ expect(exported.find((x:{id:string})=>x.id===q.id)).toEqual(q);
+ // Select this deterministic new item to exercise rendered choices and feedback.
+ await nav(page,'학습 대시보드');
+ await page.getByRole('button',{name:'문제풀이 시작하기',exact:true}).click();
+ await page.evaluate(({key,id})=>{const s=JSON.parse(localStorage.getItem(key)!);s.practice={...s.practice,currentId:id,seen:[],selected:null,revealed:false};localStorage.setItem(key,JSON.stringify(s));},{key,id:q.id});
+ await page.reload();await nav(page,'랜덤 문제풀이');
+ await expect(page.locator('.question-stem')).toHaveText(q.question);
+ await page.getByRole('group',{name:'답안 선택'}).getByRole('button').nth(q.answer-1).click();
+ await expect(page.getByRole('status')).toContainText('정답입니다');
+ await expect(page.locator('.explanation')).toContainText(q.explanation);
+ await page.keyboard.press('Space');
+ expect((await read(page)).practice.currentId).not.toBe(q.id);
 });

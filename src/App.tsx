@@ -156,6 +156,7 @@ function Source({ q }: { q: Question }) {
   return (
     <div className="source">
       <span className="tag">{TYPE_LABEL[q.type]}</span>
+      {q.family && <span className="tag">수치 조건 변형 · {q.family}</span>}
       <span>
         {q.year
           ? `${q.year}년 ${q.session ? `${q.session}회차` : ""}`
@@ -867,6 +868,7 @@ function App() {
                     {bank.filter((q) => q.type === "past").length} · 복원{" "}
                     {bank.filter((q) => q.type === "reconstructed").length} ·
                     자체 제작 {bank.filter((q) => q.type === "original").length}{" "}
+                    · 수치 조건 변형 {bank.filter((q) => q.family).length}문항
                     · 내부 검수{" "}
                     {
                       bank.filter((q) => q.verificationStatus === "reviewed")
@@ -1784,7 +1786,7 @@ function BankManager({
           </strong>
           <br />
           원문 기출 0 · 복원문제 0. 공식 자료 접근 제한으로 기출 원문 및
-          출제기준 대조는 완료하지 못했습니다. 기본 문항은 AI 일반 지식 기반 자체 제작으로 문장·선택지 내부 검토만 수행했습니다. 외부 전문가 검수와 공식 출제기준 대조는 미완료입니다. 목표 1,000문항 중 실제 {PROFILE.questionCount}문항, 부족 920문항입니다. 법규 과목 20문항은 일반 법령 독해 연습이며 현행 소방관계법규 세부 내용은 포함하지 않습니다. 시험 구성은 4과목 각 20문항·{PROFILE.durationMinutes}분·평균 60점 및 과목별 40점 이상이라는 학습용 설정으로 공식 안내 재확인이 필요합니다.
+          출제기준 대조는 완료하지 못했습니다. 기본 문항은 AI 일반 지식 기반 자체 제작입니다. 개념형 {BASE_BANK.filter((q) => !q.family).length}문항과 수치 조건 변형 {BASE_BANK.filter((q) => q.family).length}문항({new Set(BASE_BANK.flatMap((q) => q.family ? [q.family] : [])).size}유형)을 구분합니다. 문장·선택지 내부 검토 및 별도 코드의 수치 재계산을 수행했으며 외부 전문가 검수와 공식 출제기준 대조는 미완료입니다. 목표 1,000문항 중 기본 은행 내부 검수 {BASE_BANK.filter((q) => q.verificationStatus === "reviewed").length}문항, 부족 {Math.max(0, 1000 - BASE_BANK.filter((q) => q.verificationStatus === "reviewed").length)}문항입니다. 법규 과목 20문항은 일반 법령 독해 연습이며 현행 소방관계법규 세부 내용은 포함하지 않습니다. 시험 구성은 4과목 각 20문항·{PROFILE.durationMinutes}분·평균 60점 및 과목별 40점 이상이라는 학습용 설정으로 공식 안내 재확인이 필요합니다.
         </div>
       </div>
       <div className="bank-tools panel">
