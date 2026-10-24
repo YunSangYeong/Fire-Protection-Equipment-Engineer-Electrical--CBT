@@ -1,0 +1,25 @@
+[
+  {
+    "id": "IMPORT-EXAMPLE-001",
+    "subject": "소방전기일반",
+    "topic": "직류",
+    "question": "저항 10 Ω에 50 V의 직류 전압을 가했을 때 전류는?",
+    "choices": [
+      "5 A",
+      "0.2 A",
+      "500 A",
+      "40 A"
+    ],
+    "answer": 1,
+    "explanation": "옴의 법칙 I=V/R=50/10=5 A이다. 전압과 저항의 단위를 확인한다.",
+    "difficulty": "하",
+    "year": null,
+    "session": null,
+    "type": "original",
+    "sourceUrl": "https://github.com/YunSangYeong/Fire-Protection-Equipment-Engineer-Electrical--CBT/blob/main/scripts/author_bank.py",
+    "verificationStatus": "pending",
+    "reviewNote": "AI 일반 지식으로 자체 작성 후 문장·정답·오답 선택지 내부 대조. 외부 정답 증빙·전문가 검수·공식 출제기준 대조 없음. 법규 과목은 일반 법령 독해 연습이며 현행 소방 법령 세부 규정 문항이 아님.",
+    "version": "main",
+    "rights": "자체 제작 · CC BY 4.0 · 이 저장소와 작성 원고를 표시. 외부 기출 복제 없음."
+  }
+]
